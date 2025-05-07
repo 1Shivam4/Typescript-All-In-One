@@ -669,3 +669,109 @@ for (const revenue in monthlySalary) {
   console.log(monthlySalary[revenue as keyof Incomes]);
 }
 ```
+
+# Generics
+
+<h4> Generics allows us to predefine some varaible properties type, interface. When it is not certain what type of data is going to be returned</h4>
+
+```ts
+// This is the example of generic type
+// As it will accept any type of value pass into the function
+const echo = <T>(arg: T): T => arg;
+```
+
+## Usage of generics inside of Function declaration and function call
+
+```ts
+const isObj = <T>(arg: T): boolean => {
+  return typeof arg === "object" && !Array.isArray(arg) && arg !== null;
+};
+
+console.log(isObj(true));
+console.log(isObj("John"));
+console.log(isObj([1, 2, 3]));
+console.log(isObj({ name: "John" }));
+console.log(isObj(null));
+
+const isTrue = <T>(arg: T): { arg: T; is: boolean } => {
+  if (Array.isArray(arg) && !arg.length) {
+    return { arg, is: false };
+  }
+
+  // Used isObj function to check the object
+  if (isObj(arg) && !Object.keys(arg as keyof T).length) {
+    return { arg, is: false };
+  }
+
+  return { arg, is: !!arg };
+};
+
+console.log(isTrue(false));
+console.log(isTrue(0));
+console.log(isTrue(true));
+console.log(isTrue(1));
+console.log(isTrue("Dave"));
+console.log(isTrue(""));
+console.log(isTrue(null));
+console.log(isTrue(undefined));
+console.log(isTrue({}));
+console.log(isTrue({ name: "Dave" }));
+console.log(isTrue([]));
+console.log(isTrue([1, 2, 3]));
+console.log(isTrue(NaN));
+console.log(isTrue(-0));
+```
+
+## Creating Generics with interface
+
+```ts
+// Interface having value and is as type variables
+interface BoolCheck<T> {
+  value: T;
+  is: Boolean;
+}
+
+const checkBoolValue = <T>(arg: T): BoolCheck<T> => {
+  if (Array.isArray(arg) && !arg.length) {
+    return { value: arg, is: false };
+  }
+
+  if (isObj(arg) && !Object.keys(arg as keyof T).length) {
+    return { value: arg, is: false };
+  }
+
+  return { value: arg, is: !!arg };
+};
+```
+
+## Use of Generics in Classes
+
+```ts
+// Generice in a class
+class StateObj<T> {
+  private data;
+
+  constructor(val: T) {
+    this.data = val;
+  }
+
+  get state(): T {
+    return this.data;
+  }
+
+  set state(value: T) {
+    this.data = value;
+  }
+}
+
+const store = new StateObj<string>("John");
+console.log(store.state);
+store.state = "Dave";
+// store.state = 12; // this will give you error because of the type inference hence the type of this state is string when we are this point
+
+const mystate = new StateObj<(string | number | boolean)[]>([15]);
+mystate.state = ["Dave", 42, true];
+console.log(mystate.state);
+```
+
+### For more complex example check the main.ts file of Generic Typing in resources
