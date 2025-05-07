@@ -775,3 +775,190 @@ console.log(mystate.state);
 ```
 
 ### For more complex example check the main.ts file of Generic Typing in resources
+
+# Utility Types
+
+<h4>Prebuilt types which helps you define the return or the type usecase.</h4>
+
+### Partial type
+
+- This allows to pass the selected props from the type definition (type or interface)\*
+
+```ts
+const updateAssignment = (
+  assign: Assignment,
+  propsToUpdte: Partial<Assignment>
+): Assignment => {
+  return { ...assign, ...propsToUpdte };
+};
+
+const assign1: Assignment = {
+  studentId: "comsc1122",
+  title: "Final Project",
+  grade: 0,
+};
+
+console.log(updateAssignment(assign1, { grade: 95 })); // This is the example of the partial assignment
+const assignGraded: Assignment = updateAssignment(assign1, { grade: 95 });
+```
+
+## Required and Readonly
+
+### Required Type
+
+_This Required means we have to use give all the property names as it is required_
+
+```ts
+const recordAssignment = (assign: Required<Assignment>): Assignment => {
+  // send to database, etc
+  return assign;
+};
+```
+
+### Readonly Type
+
+```ts
+const assignedVerified: Readonly<Assignment> = {
+  ...assignGraded,
+  verified: true,
+};
+
+// assignedVerified.grade = 88; // Cannot assign to 'grade' because it is a read-only property
+
+recordAssignment({ ...assignGraded, verified: true });
+```
+
+### Important: Record Type
+
+- Record can contain the data like an object\*
+
+```ts
+// Type definition of Record Type => {string, string}
+const hexColorMap: Record<string, string> = {
+  red: "#FF0000",
+  green: "00FF00",
+  blue: "0000FF",
+};
+
+type Students = "Sara" | "Kelly";
+type LetterGrades = "A" | "B" | "C" | "D" | "U";
+
+const finalGrades: Record<Students, LetterGrades> = {
+  Sara: "B",
+  Kelly: "U",
+};
+```
+
+### Record with interface
+
+```ts
+interface Grades {
+  assign1: number;
+  assing2: number;
+}
+
+const gradeData: Record<Students, Grades> = {
+  Sara: { assign1: 87, assing2: 93 },
+  Kelly: { assign1: 76, assing2: 15 },
+};
+```
+
+### Pick and Omit
+
+**Pick**
+_This allows to pick anything form the assignments_
+
+```ts
+type AssignResult = Pick<Assignment, "studentId" | "grade">;
+
+const score: AssignResult = {
+  studentId: "k123",
+  grade: 88,
+};
+```
+
+**Omit**
+_This is used to omit the declared properties_
+
+```ts
+type AssignPreview = Omit<Assignment, "grade" | "verified">;
+
+const preview: AssignPreview = {
+  studentId: "k123",
+  title: "Final Project",
+};
+```
+
+### Extract and Exclude
+
+```ts
+type adjustedGrade = Exclude<LetterGrades, "U">;
+// returns => type adjustedGrade = "A" | "B" | "C" | "D" as it excludes "U" From the list
+
+type highGrades = Extract<LetterGrades, "A" | "B">;
+// extracts => type highGrades = "A" | "B"
+```
+
+### Important: Return Type
+
+```ts
+//This is the normal type assignment behaviour.
+// But the problem with this is if we are using it as a return type.
+// As the function changes thus we also need to change the type definition or the return type
+
+type newAssign = { title: string; points: number };
+const createNewAssign = (title: string, points: number): newAssign => {
+  return { title, points };
+};
+
+const createNewAssign = (title: string, points: number) => {
+  return { title, points };
+};
+
+// By using this we can redclear the return type.
+// Useful when we are handling some API response
+// Using some parts of the dynamic responses to structure it
+type NewAssign = ReturnType<typeof createNewAssign>;
+
+const tsAssign: NewAssign = createNewAssign("Utility Types", 100);
+console.log(tsAssign);
+```
+
+### Parameters
+
+_Derive a type from the function itself.
+This gives us the tuple type of data_
+
+```ts
+type AssignParams = Parameters<typeof createNewAssign>;
+const assignArgs: AssignParams = ["Generics", 100];
+
+const tsAssign2: NewAssign = createNewAssign(...assignArgs);
+console.log(tsAssign2);
+```
+
+### Awaited helps to handle return Promises
+
+```ts
+interface User {
+  id: number;
+  name: string;
+  username: string;
+  email: string;
+}
+
+const fetchUser = async (): Promise<User[]> => {
+  const data = await fetch("https://jsonplaceholder.typicode.com/users")
+    .then((res) => {
+      return res.json();
+    })
+    .catch((err) => {
+      if (err instanceof Error) console.log(err.message);
+    });
+  return data;
+};
+
+type FetchUsersReturnType = Awaited<ReturnType<typeof fetchUser>>;
+
+fetchUser().then((users) => console.log(users));
+```
